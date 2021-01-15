@@ -3,6 +3,10 @@ import {Store} from './store';
 export const Notebooksbilliger: Store = {
   currency: '€',
   labels: {
+    captcha: {
+      container: 'body',
+      text: ['client has been blocked by bot protection'],
+    },
     inStock: {
       container: '.warehouse',
       text: [
