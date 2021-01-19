@@ -88,8 +88,8 @@ import {NeweggCa} from './newegg-ca';
 import {NeweggSg} from './newegg-sg';
 import {Notebooksbilliger} from './notebooksbilliger';
 import {Novatech} from './novatech';
-import {Nvidia} from './nvidia';
-import {NvidiaApi} from './nvidia-api';
+//import {Nvidia} from './nvidia';
+//import {NvidiaApi} from './nvidia-api';
 import {OfficeDepot} from './officedepot';
 import {Ollo} from './ollo';
 import {Otto} from './otto';
@@ -222,8 +222,8 @@ export const storeList = new Map([
   [NeweggSg.name, NeweggSg],
   [Notebooksbilliger.name, Notebooksbilliger],
   [Novatech.name, Novatech],
-  [Nvidia.name, Nvidia],
-  [NvidiaApi.name, NvidiaApi],
+  //[Nvidia.name, Nvidia],
+  //[NvidiaApi.name, NvidiaApi],
   [OfficeDepot.name, OfficeDepot],
   [Ollo.name, Ollo],
   [Otto.name, Otto],
@@ -293,6 +293,9 @@ function filterBrandsSeriesModels() {
 }
 
 function printConfig() {
+  logger.info(`ℹ browser engine: ${config.browser.engine}`);
+  logger.info(`ℹ selected device: ${process.env.DEVICE}`);
+
   if (config.store.stores.length > 0) {
     logger.info(
       `ℹ selected stores: ${config.store.stores

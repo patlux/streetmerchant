@@ -1,4 +1,6 @@
-import {Browser, LoadEvent} from 'puppeteer';
+import type {Browser} from 'playwright';
+
+type LoadEvent = 'domcontentloaded' | 'load' | 'networkidle';
 
 export type Element = {
   container?: string;

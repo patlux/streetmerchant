@@ -1,6 +1,6 @@
 import {Link, Series, Store} from './model';
 import {Print, logger} from '../logger';
-import {Browser} from 'puppeteer';
+import type {Browser} from 'playwright';
 import cheerio from 'cheerio';
 import {filterSeries} from './filter';
 import {usingResponse} from '../util';

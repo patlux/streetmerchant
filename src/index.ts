@@ -1,15 +1,17 @@
 import * as Process from 'process';
 import {config} from './config'; // Needs to be loaded first
 import {startAPIServer, stopAPIServer} from './web'; // eslint-disable-line sort-imports
-import {Browser} from 'puppeteer';
+// import {Browser} from 'puppeteer';
 import {getSleepTime} from './util';
 import {logger} from './logger';
-import puppeteer from 'puppeteer-extra';
-import stealthPlugin from 'puppeteer-extra-plugin-stealth';
+// import puppeteer from 'puppeteer-extra';
+// import stealthPlugin from 'puppeteer-extra-plugin-stealth';
+import playwright from 'playwright';
+import type {Browser} from 'playwright';
 import {storeList} from './store/model';
 import {tryLookupAndLoop} from './store';
 
-puppeteer.use(stealthPlugin());
+// puppeteer.use(stealthPlugin());
 
 let browser: Browser | undefined;
 
@@ -48,21 +50,24 @@ async function main() {
   }
 
   await stop();
-  browser = await puppeteer.launch({
+  const browserEngine = playwright[config.browser.engine];
+  browser = await browserEngine.launch({
     args,
-    defaultViewport: {
-      height: config.page.height,
-      width: config.page.width,
-    },
+    // TODO: playwright
+    // defaultViewport: {
+    //   height: config.page.height,
+    //   width: config.page.width,
+    // },
     headless: config.browser.isHeadless,
   });
 
-  config.browser.userAgent = await browser.userAgent();
+  // config.browser.userAgent = await browser.userAgent();
 
   for (const store of storeList.values()) {
     logger.debug('store links', {meta: {links: store.links}});
     if (store.setupAction !== undefined) {
-      store.setupAction(browser);
+      // TODO: playwright
+      // store.setupAction(browser);
     }
 
     setTimeout(tryLookupAndLoop, getSleepTime(store), browser, store);

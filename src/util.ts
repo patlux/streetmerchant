@@ -1,7 +1,9 @@
-import {Browser, Page, Response} from 'puppeteer';
+// import {Browser, Page, Response} from 'puppeteer';
+import type {Browser, Page, Response} from 'playwright';
 import {StatusCodeRangeArray, Store} from './store/model';
 import {config} from './config';
-import {disableBlockerInPage} from './adblocker';
+// TODO: playwright
+// import {disableBlockerInPage} from './adblocker';
 import {logger} from './logger';
 import topUserAgents from 'top-user-agents';
 
@@ -60,7 +62,8 @@ export async function usingPage<T>(
 ): Promise<T> {
   const page = await browser.newPage();
   page.setDefaultNavigationTimeout(config.page.timeout);
-  await page.setUserAgent(await getRandomUserAgent());
+  // TODO: playwright
+  // await page.setUserAgent(await getRandomUserAgent());
 
   try {
     return await cb(page, browser);
@@ -75,7 +78,7 @@ export async function usingPage<T>(
 
 export async function closePage(page: Page) {
   if (!config.browser.lowBandwidth) {
-    await disableBlockerInPage(page);
+    // await disableBlockerInPage(page);
   }
 
   await page.close();

@@ -1,7 +1,7 @@
 import {NvidiaRegionInfo, regionInfos} from '../nvidia-api';
-import {Browser} from 'puppeteer';
+import type {Browser} from 'playwright';
 import {Link} from '../store';
-import {NvidiaCart} from './nvidia-cart';
+// import {NvidiaCart} from './nvidia-cart';
 import {config} from '../../../config';
 import {timestampUrlParameter} from '../../timestamp-url-parameter';
 
@@ -32,23 +32,22 @@ function nvidiaStockUrl(
   );
 }
 
-let cart: NvidiaCart;
+// let cart: NvidiaCart;
 
 export function generateSetupAction() {
   return async (browser: Browser) => {
-    cart = new NvidiaCart(browser);
-
-    if (config.browser.open) {
-      cart.keepAlive();
-    }
+    // cart = new NvidiaCart(browser);
+    // if (config.browser.open) {
+    //   cart.keepAlive();
+    // }
   };
 }
 
 export function generateOpenCartAction(id: number, cardName: string) {
   return async () => {
-    const url = await cart.addToCard(id, cardName);
-
-    return url;
+    // const url = await cart.addToCard(id, cardName);
+    // return url;
+    return '';
   };
 }
 

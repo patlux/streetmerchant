@@ -1,11 +1,5 @@
-import {
-  Browser,
-  Page,
-  PageEventObj,
-  Request,
-  RespondOptions,
-  Response,
-} from 'puppeteer';
+import {devices} from 'playwright';
+import type {Browser, Page, Request, Response} from 'playwright';
 import {Link, Store, getStores} from './model';
 import {Print, logger} from '../logger';
 import {Selector, getPrice, pageIncludesLabels} from './includes-labels';
@@ -17,7 +11,8 @@ import {
   isStatusCodeInRange,
   noop,
 } from '../util';
-import {disableBlockerInPage, enableBlockerInPage} from '../adblocker';
+// TODO: playwright
+// import {disableBlockerInPage, enableBlockerInPage} from '../adblocker';
 import {config} from '../config';
 import {fetchLinks} from './fetch-links';
 import {filterStoreLink} from './filter';
@@ -59,7 +54,8 @@ async function handleLowBandwidth(request: Request) {
   const typ = request.resourceType();
   if (typ === 'font' || typ === 'image') {
     try {
-      await request.abort();
+      // TODO: playwright: replace with page.route() https://playwright.dev/docs/api/class-page#pagerouteurl-handler
+      // await request.abort();
     } catch {
       logger.debug('Failed to abort request.');
     }
@@ -80,7 +76,8 @@ async function handleProxy(request: Request, proxy?: string) {
   } catch (error: unknown) {
     logger.error('handleProxy', error);
     try {
-      await request.abort();
+      // TODO: playwright: replace with page.route() https://playwright.dev/docs/api/class-page#pagerouteurl-handler
+      // await request.abort();
     } catch {
       logger.debug('Failed to abort request.');
     }
@@ -101,7 +98,8 @@ async function handleAdBlock(request: Request, adBlockRequestHandler: any) {
 
     const abortFunc = async () => {
       try {
-        await request.abort();
+        // TODO: playwright: replace with page.route() https://playwright.dev/docs/api/class-page#pagerouteurl-handler
+        // await request.abort();
       } catch {
         logger.debug('Failed to abort request.');
       }
@@ -109,9 +107,11 @@ async function handleAdBlock(request: Request, adBlockRequestHandler: any) {
       resolve(true);
     };
 
-    const respondFunc = async (response: RespondOptions) => {
+    // TODO: playwright
+    const respondFunc = async (/*response: RespondOptions*/) => {
       try {
-        await request.respond(response);
+        // TODO: playwright: replace with page.route() https://playwright.dev/docs/api/class-page#pagerouteurl-handler
+        // await request.respond(response);
       } catch {
         logger.debug('Failed to abort request.');
       }
@@ -184,68 +184,80 @@ async function lookup(browser: Browser, store: Store) {
     const useAdBlock = !config.browser.lowBandwidth && !store.disableAdBlocker;
     const customContext = config.browser.isIncognito;
 
-    const context = customContext
-      ? await browser.createIncognitoBrowserContext()
-      : browser.defaultBrowserContext();
+    // TODO: playwright
+    // const context = customContext
+    //   ? await browser.createIncognitoBrowserContext()
+    //   : browser.defaultBrowserContext();
+    const device = devices[process.env.DEVICE || 'iPhone 11'];
+    const {isMobile, ...deviceWithoutIsMobile} = device;
+    const context = await browser.newContext({
+      ...deviceWithoutIsMobile,
+      // Prevents throwing error due to missing support in firefox
+      ...(config.browser.engine === 'firefox' ? {} : {isMobile}),
+    });
     const page = await context.newPage();
-    await page.setRequestInterception(true);
+    // TODO: playwright
+    // await page.setRequestInterception(true);
 
     page.setDefaultNavigationTimeout(config.page.timeout);
-    await page.setUserAgent(await getRandomUserAgent());
+    // TODO: playwright
+    // await page.setUserAgent(await getRandomUserAgent());
 
-    let adBlockRequestHandler: any;
-    let pageProxy;
-    if (useAdBlock) {
-      const onProxyFunc = (event: keyof PageEventObj, handler: any) => {
-        if (event !== 'request') {
-          page.on(event, handler);
-          return;
-        }
+    // TODO: playwright
+    // let adBlockRequestHandler: any;
+    // let pageProxy;
+    // if (useAdBlock) {
+    //   const onProxyFunc = (event: keyof PageEventObj, handler: any) => {
+    //     if (event !== 'request') {
+    //       page.on(event, handler);
+    //       return;
+    //     }
 
-        adBlockRequestHandler = handler;
-      };
+    //     adBlockRequestHandler = handler;
+    //   };
 
-      pageProxy = new Proxy(page, {
-        get(target, prop, receiver) {
-          if (prop === 'on') {
-            return onProxyFunc;
-          }
+    //   pageProxy = new Proxy(page, {
+    //     get(target, prop, receiver) {
+    //       if (prop === 'on') {
+    //         return onProxyFunc;
+    //       }
 
-          // Give dummy setRequestInterception to avoid AdBlock from messing with it
-          if (prop === 'setRequestInterception') {
-            return noop;
-          }
+    //       // Give dummy setRequestInterception to avoid AdBlock from messing with it
+    //       if (prop === 'setRequestInterception') {
+    //         return noop;
+    //       }
 
-          return Reflect.get(target, prop, receiver);
-        },
-      });
-      await enableBlockerInPage(pageProxy);
-    }
+    //       return Reflect.get(target, prop, receiver);
+    //     },
+    //   });
+    //   await enableBlockerInPage(pageProxy);
+    // }
 
-    await page.setRequestInterception(true);
-    page.on('request', async request => {
-      if (await handleLowBandwidth(request)) {
-        return;
-      }
+    // await page.setRequestInterception(true);
+    // page.on('request', async request => {
+    //   if (await handleLowBandwidth(request)) {
+    //     return;
+    //   }
 
-      if (await handleAdBlock(request, adBlockRequestHandler)) {
-        return;
-      }
+    //   if (await handleAdBlock(request, adBlockRequestHandler)) {
+    //     return;
+    //   }
 
-      if (await handleProxy(request, proxy)) {
-        return;
-      }
+    //   if (await handleProxy(request, proxy)) {
+    //     return;
+    //   }
 
-      try {
-        await request.continue();
-      } catch {
-        logger.debug('Failed to continue request.');
-      }
-    });
+    //   try {
+    //     await request.continue();
+    //   } catch {
+    //     logger.debug('Failed to continue request.');
+    //   }
+    // });
 
-    if (store.captchaDeterrent) {
-      await runCaptchaDeterrent(browser, store, page);
-    }
+    // TODO: playwright
+    // if (store.captchaDeterrent) {
+    //   await runCaptchaDeterrent(browser, store, page);
+    // }
 
     let statusCode = 0;
 
@@ -257,13 +269,15 @@ async function lookup(browser: Browser, store: Store) {
           (error as Error).message
         }`
       );
-      const client = await page.target().createCDPSession();
-      await client.send('Network.clearBrowserCookies');
+      await page.context().clearCookies();
+      // const client = await page.target().createCDPSession();
+      // await client.send('Network.clearBrowserCookies');
     }
 
-    if (pageProxy) {
-      await disableBlockerInPage(pageProxy);
-    }
+    // TODO: playwright
+    // if (pageProxy) {
+    //   await disableBlockerInPage(pageProxy);
+    // }
 
     // Must apply backoff before closing the page, e.g. if CloudFlare is
     // used to detect bot traffic, it introduces a 5 second page delay
@@ -283,7 +297,7 @@ async function lookupCard(
   page: Page,
   link: Link
 ): Promise<number> {
-  const givenWaitFor = store.waitUntil ? store.waitUntil : 'networkidle0';
+  const givenWaitFor = store.waitUntil ? store.waitUntil : 'networkidle';
   const response: Response | null = await page.goto(link.url, {
     waitUntil: givenWaitFor,
   });
@@ -351,7 +365,7 @@ async function handleResponse(
           logger.warn(Print.recursionLimit(link, store, true));
         } else {
           const response: Response | null = await page.waitForNavigation({
-            waitUntil: 'networkidle0',
+            waitUntil: 'networkidle',
           });
           recursionDepth++;
           statusCode = await handleResponse(
@@ -507,7 +521,7 @@ async function runCaptchaDeterrent(browser: Browser, store: Store, page: Page) {
     logger.debug(`Selected captcha-deterrent link: ${link.url}`);
 
     try {
-      const givenWaitFor = store.waitUntil ? store.waitUntil : 'networkidle0';
+      const givenWaitFor = store.waitUntil ? store.waitUntil : 'networkidle';
       const response: Response | null = await page.goto(link.url, {
         waitUntil: givenWaitFor,
       });

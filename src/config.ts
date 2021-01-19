@@ -170,7 +170,20 @@ function loadProxyList(filename: string): string[] | undefined {
   }
 }
 
+function pickBrowserEngine(
+  browserEngine: string | null
+): 'webkit' | 'chromium' | 'firefox' {
+  switch (browserEngine) {
+    case 'chromium':
+      return 'chromium';
+    case 'firefox':
+      return 'firefox';
+  }
+  return 'webkit';
+}
+
 const browser = {
+  engine: pickBrowserEngine(envOrString(process.env.BROWSER_ENGINE, 'webkit')),
   isHeadless: envOrBoolean(process.env.HEADLESS),
   isIncognito: envOrBoolean(process.env.INCOGNITO, false),
   isTrusted: envOrBoolean(process.env.BROWSER_TRUSTED, false),
