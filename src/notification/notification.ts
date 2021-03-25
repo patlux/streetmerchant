@@ -4,6 +4,7 @@ import {playSound} from './sound';
 import {sendDesktopNotification} from './desktop';
 import {sendDiscordMessage} from './discord';
 import {sendEmail} from './email';
+import {sendHttp} from './http';
 import {sendMqttMessage} from './mqtt';
 import {sendPagerDutyNotification} from './pagerduty';
 import {sendPushbulletNotification} from './pushbullet';
@@ -22,6 +23,7 @@ import {sendApns} from './apns';
 export function sendNotification(link: Link, store: Store) {
   // Priority
   playSound();
+  sendHttp(link, store);
   sendDiscordMessage(link, store);
   sendDesktopNotification(link, store);
   sendEmail(link, store);
